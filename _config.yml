@@ -1,0 +1,25 @@
+title:              2na's Blog
+email:              shashank.shashank.c@gmail.com
+description:        2nafish117's Blogging space
+author:             2nafish117
+baseurl:            "/2nafish117"
+url:                "https://2nafish117.github.io"
+
+# Social Profiles
+# twitter_username:   SBootstrap
+github_username:    2nafish117
+# facebook_username:  StartBootstrap
+# instagram_username:  
+# linkedin_username:
+
+# Add your google-analytics ID here to activate google analytics
+google_analytics:   UA-XXXXXXXXX-X # out your google-analytics code
+
+# Build settings
+markdown:           kramdown
+paginate:           5
+paginate_path:      "/posts/page:num/"
+plugins:
+  - jekyll-feed
+  - jekyll-paginate
+  - jekyll-sitemap ## Uncomment this line to silently generate a sitemaps.org compliant sitemap for your Jekyll site
