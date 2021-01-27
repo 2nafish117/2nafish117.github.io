@@ -61,7 +61,7 @@ const char* const DaysToString[] = {
 
 <p>The solution I provide is not my own, i just saw it from this <a href="https://youtu.be/iVBCBcEANBc">video</a> and wanted to document it in my blog.</p>
 
-<p>First you make a file containing this shit.</p>
+<p>First you make a file containing this shit. Dont lose your shit yet, next code snippet actually defines <code>REGISTER_ENUM</code>.</p>
 
 <pre><code class="cpp">&#47;&#47; DaysEnums.incl, call it whatever tf you want.
 REGISTER_ENUM(MONDAY = 0) &#47;&#47; You can do the "= 0" as well
@@ -79,7 +79,7 @@ REGISTER_ENUM(SUNDAY)
 #define REGISTER_ENUM(x) x, &#47;&#47; It expands to literally x followed by a comma
 
 enum Days{
-	#include "DaysEnums.h" &#47;&#47; Does a literal copy paste into here.
+	#include "DaysEnums.incl" &#47;&#47; Does a literal copy paste into here.
 	NUM_DAYS &#47;&#47; You dont want to register this in the DaysEnums.h file.
 };
 
@@ -87,7 +87,7 @@ enum Days{
 #define REGISTER_ENUM(x) #x, &#47;&#47; Preprocessor wizardry replaces #x with the string version of x, literally.
 
 const char* const DaysToString[] = {
-	#include "DaysEnums.h"
+	#include "DaysEnums.incl"
 	"INVALID_DAY" &#47;&#47; Pretty sure you know why.
 };
 
