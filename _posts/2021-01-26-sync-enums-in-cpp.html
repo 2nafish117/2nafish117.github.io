@@ -18,8 +18,8 @@ background: '/img/godot-code-bg.jpg'
 <!-- see this for charecter encodings in html -->
 <!-- https://www.freeformatter.com/html-entities.html -->
 
-<p>Do you just want to define your enums once, and have their strings generated automatically? Well you can do that, if youre willing to fuck with the cpp preprocessor.</p>
-<p>Lets first start with wtf im even talking about. Here is a code snippet </p>
+<p>Do you just want to define your enums once, and have their strings generated automatically? Well you can do that, if you're willing to fuck with the cpp preprocessor.</p>
+<p>Lets first start with wtf im even talking about. Here is a code snippet.</p>
 
 <pre><code class="cpp">&#47;&#47; Days.h
 enum Days {
@@ -50,7 +50,7 @@ const char* const DaysToString[] = {
 <p>So whats the problem with this?</p>
 <p>
 	Well for starters if you need to add another day, then you need to make changes in the code in two places. 
-	Might not look too difficult when you have so few enums, but think about maintaining them when you have more than a handful. Or being the lazy shit you are, you may just forget.
+	Might not look too difficult when you have so few enums, but think about maintaining them when you have more than a handful. Or being the forgetful shit you are, you may just forget.
 	Also, if you re-arrange the days, you need to re-arrange them in the strings as well. Change the enum spelling? Guess what, you need to change it in the strings.	
 </p>
 
@@ -61,7 +61,7 @@ const char* const DaysToString[] = {
 
 <p>The solution I provide is not my own, i just saw it from this <a href="https://youtu.be/iVBCBcEANBc">video</a> and wanted to document it in my blog.</p>
 
-<p>First you make a file containing this shit.</p>
+<p>First you make a file containing this .. shit.</p>
 
 <pre><code class="cpp">&#47;&#47; DaysEnums.incl, call it whatever tf you want.
 REGISTER_ENUM(MONDAY = 0) &#47;&#47; You can do the "= 0" as well
@@ -73,7 +73,8 @@ REGISTER_ENUM(SATURDAY)
 REGISTER_ENUM(SUNDAY)
 </code></pre>
 
-<p> Dont lose your shit yet, next code snippet actually defines <code>REGISTER_ENUM</code>. Notice it contains no commas, semicolons. And in a second file, this .. </p>
+<p> Dont lose your shit yet, next code snippet actually defines <code>REGISTER_ENUM</code>. Notice it contains no commas, semicolons. </p>
+<p>And in a second file, this .. </p>
 
 <pre><code class="cpp">&#47;&#47; DaysEnumsDef.h, call it whatever tf you want.
 #define REGISTER_ENUM(x) x, &#47;&#47; It expands to literally x followed by a comma
@@ -102,7 +103,7 @@ const char* const DaysToString[] = {
 <p>
 	Now its your choice if you want to use this or not. Is it really simpler than just doing it yourself? You be the judge of that. Preprocessor magic shit 
 	like this is what makes newcomers to your codebase bleed their eyes out, so maybe comment this shit out?
-	And with that ill see y'all later, Bye.
+	And with that ill see y'all in the next post.
 </p>
 
 
