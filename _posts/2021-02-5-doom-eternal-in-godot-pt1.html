@@ -1,0 +1,375 @@
+---
+layout: post
+title: "Doom Eternal in Godot: Pt1"
+subtitle: "Rip and Tear"
+date: 2021-02-05 12:00:00 +0530
+background: '/img/godot-code-bg.jpg'
+---
+
+<!-- see below link for code formatting shit -->
+<!-- https://therealweblog.blogspot.com/2019/05/how-to-format-code-snippets-in-blogger.html -->
+<!-- https://github.com/highlightjs/highlight.js/blob/master/SUPPORTED_LANGUAGES.md -->
+<!-- this is all code formatting shit -->
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/atom-one-dark-reasonable.min.css' rel='stylesheet'/>
+<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js'></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- see this for charecter encodings in html -->
+<!-- https://www.freeformatter.com/html-entities.html -->
+
+<p>
+	Movement is one of the most important things to get right in any FPS, the other being shooting of course. So getting movement right pays off. 
+	Ive been playing Doom Eternal lately and wanted to remake it's movement mechanics in godot.  
+</p>
+
+<h2 class="section-heading">What even is Doom Eternal?</h2>
+<p>
+	So what makes Doom's movement? Doom like the shooters of old has a fast base movement speed, 
+	no sprinting, double jump and depending if you have the flight mobility rune enabled or not (i always enable it, and you should too) you get air control.
+	But unlike <a href="https://youtu.be/dXCOKpJcYZU" target="_blank" rel="noopener noreferrer">boomer shooters</a>, Doom also gives you the dash ability and a lot of platforming involving clambering over ledges, 
+	grabbing walls and using poles to jump across larger gaps.
+	Chaining one or more of these advanced movement mechanics together gives you a pretty nice platforming puzzle.
+	Some other things that influence how you move in doom eternal are jump pads and portals, they allow you to move across the arena even faster.
+	Advanced players also use their weapons to move faster, like the ballista that propells you in the opposite direction when you shoot it or my favourite, 
+	the meat hook. The meathook lets you hook yourself onto another demon and close the distance or fling yourself by taking advantage of a little thing 
+	called centripetal force. 
+</p>
+
+<h2 class="section-heading">Try this shit out!</h2>
+<p>
+	What you see is my attempt to recreate most of these mechanics in the godot engine. If, like me you're someone who wants to 
+	<a href="#" target="_blank" rel="noopener noreferrer">immediately try it out you can check out this itch</a>.
+	If you want to rip apart open a full project containing all this check out <a href="https://github.com/2nafish117/gdoom" target="_blank" rel="noopener noreferrer">this repository</a>. 
+	Don't forget to read the README.
+</p>
+
+<h2 class="section-heading">How does this work?</h2>
+<!-- FpCamera explanation -->
+<p>
+	Ive written this blog as an introduction to the project, im way too lazy to make a youtube tutorial or a guide on how to do this. So let's get on with this.
+</p>
+<p>	
+	You probably already have seen multiple tutorials that make an FPS controller using a <code>KinematicBody</code> node in godot. 
+	I always liked how you can interact with other rigidbodies in half life 2, so I made an FPS controller with a <code>RigidBody</code>, 
+	this way we get most physics interactions with other rigidbodies for free, but makes it a bit harder to have finer control over the movement.
+	Luckily godot gives us a way to integrate physics forces ourselves using the 
+	<a href="https://docs.godotengine.org/en/stable/tutorials/physics/rigid_body.html?highlight=RigidBody" target="_blank" rel="noopener noreferrer">
+		<code>_integrate_forces()</code>
+	</a> callback of the <code>RigidBody</code> node.
+</p>
+<p>
+	But before we start with the FPS controller let's have a look at a simple <code>FpCamera</code> rig. 
+	I stole the idea for this "HV camera" rig from <a href="https://youtu.be/Bch-OagnX1E" target="_blank" rel="noopener noreferrer">this video</a>.
+</p>
+
+<p class="aligncenter">
+	<img class="img-fluid" src="{{site.baseurl}}/img/posts/2021-02-5-doom-eternal-in-godot-pt1/fp_camera_node_tree.jpg" alt="FpCamera node tree">
+	<span class="caption text-muted">FpCamera scene tree.</span>
+</p>
+
+<p>The camera rig works by using the <code>H</code> node to rotate around the local Y axis and the <code>V</code> node for rotation around the local X axis.</p>
+
+<p>@TODO: maye show gif of rotating camera</p>
+
+<!-- Rigidbody player controller explanation with modular stuff -->
+<p>The RigidBody FPS Controller uses the FpCamera along with collisions and movement scripts. 
+	This is what the node tree of the player looks like.
+</p>
+<p class="aligncenter">
+	<img class="img-fluid" src="{{site.baseurl}}/img/posts/2021-02-5-doom-eternal-in-godot-pt1/gdoomguy_node_tree.jpg" alt="GDoomGuy scene tree" >
+	<span class="caption text-muted">GDoomGuy scene tree.</span>
+</p>
+<p>@TODO: remove floor in proximity area also</p>
+
+<p>
+	The node structure of <code>GDoomGuy</code> (yes im calling him that) has a bunch of children nodes, 
+	each of which has something going on for it and <code>GDoomGuy</code> calls in on their code 
+	(basically <a href="https://en.wikipedia.org/wiki/Composition_over_inheritance" target="_blank" rel="noopener noreferrer">composition</a> at the node level).
+	For example the <code>Movement</code> node contains variables and functions about movement, 
+	this makes it easier to add separate abilities like <code>Dash</code> that you can add or remove from the player at runtime.
+	Maybe the <code>GDoomGuy</code> picks up the dash ability at some point in the game.
+</p>
+
+<p>
+	The first node, <code>CollisionShape</code> is a capsule collider 1.8m high and 0.6m wide.
+</p>
+
+<p>
+	<code>GroundTouchCollision</code> is a smaller capsule at the feet of the player, 
+	it just helps to stop some buggy collision at corners (i dont know how or why tf it works, but it works trust me).
+</p>
+
+<p>
+	<code>PlayerInput</code> polls input using the <code>Input</code> singleton, 
+	and a bunch of other stuff like keeping <code>queue_jump</code> true 0.1 sec after you let go of the space bar. 
+	This makes jumping right after landing from a previous jump more responsive, also it allows you to bunnyhop easily.
+	This <code>update()</code> function will be called from <code>_integrate_forces()</code> in <code>GDoomGuy.gd</code>.
+	Doing input this way lets you customize your input handling a bit more than what godot offers out of the box.
+<pre><code class="gdscript"> # PlayerInput.gd
+
+func update(delta: float):
+	# increment time every tic
+	time += delta
+
+	# movement is the wasd movement vector
+	movement = Vector3(
+		+Input.get_action_strength("move_right") - Input.get_action_strength("move_left"),
+		0.0,
+		-Input.get_action_strength("move_front") + Input.get_action_strength("move_back")
+	)
+	movement = movement.normalized()
+
+	jump = Input.is_action_just_pressed("action_jump")
+	if jump:
+		# get the current time of jump
+		jump_time = time
+
+		# keep queue_jump true on the frame of jumping
+		queue_jump = true 
+	
+	if time - jump_time > queue_jump_time:
+		# queue_jump is false only after queue_jump_time has elapsed after jump_time
+		queue_jump = false 
+
+	dash = Input.is_action_pressed("action_dash")
+</code></pre>
+</p>
+
+<p>
+	<code>Movement</code> handles all the movement, acceleration, friction and jumping.
+	First lets skim through some of the variables you can tweak.
+</p>
+
+<pre><code class="gdscript"> # Movement.gd
+
+export(float) var accel_ground := 80.0 # movement accel on ground
+export(float) var accel_air := 40.0 # movement accel in the air
+
+export(float) var friction_ground := 10.0 # ground friction
+export(float) var friction_air := 0.0 # air friction
+
+export(float) var speed_ground := 6.0 # max speed attainable on the ground
+export(float) var speed_stop := 1.0 # speed below which static friction applies, kinda..
+export(float) var speed_air := 6.0 # max speed attainable in the air
+export(float) var speed_jump := 4.5 # speed added when you jump
+export(int) var air_jump_count := 1 # number of times you can jump in the air
+export(float) var time_jump_cooldown := 0.2 # to stop you from spamming jump
+
+# when on the ground apply 3 times gravity to stick to the ground
+export(float) var ground_stick_gravity_multiplier := 3.0
+</code></pre>
+
+<p>
+	These are the variables that affect player movement.
+	But the main movement logic happens in the <code>Movement.apply_movement()</code> function. To look at the code in it's entirety look at <code>Movement.gd</code> in the project files. 
+	I haven't put it in here because I dont want to spook you. But there is a dumbed down version just below.
+</p>
+
+<pre><code class="gdscript"># dumbed down Movement.gd
+
+func apply_movement(player: RigidBody):
+	if is_on_ground:
+		subtract_floor_velocity_component_from_player_velocity()
+
+		# core ground movement logic
+		if jump:
+			do_jump()
+		else:
+			# dont apply ground stick gravity when jumping
+			if not_on_another_rigidbody():
+				apply_ground_stick_gravity()
+		do_friction()
+		do_acceleration()
+
+		add_back_floor_velocity_component_to_player_velocity()
+	else:
+		# core air movement logic
+		do_air_friction()
+		do_air_acceleration()
+		if air_jump_possible:
+			do_air_jump()
+		apply_normal_gravity()
+</code></pre>
+
+<p> I can hear you asking "how tf does <code>acceleration</code> and <code>friction</code> work?"</p>
+
+<pre><code class="gdscript"> # Movement.gd
+ 
+# takes direction of input, current velocity, maximum acceleration, maximum speed, and delta
+# and returns the new velocity after acceleration
+func accelerate(direction: Vector3, velocity: Vector3, max_accel: float, max_speed: float, delta: float) -> Vector3:
+	# quake 3 style projection of velocity on direction
+	var projection := velocity.dot(direction)
+
+	# amount of speed you can still add to the player
+	var add_speed := max_speed - projection
+	add_speed = clamp(add_speed, 0.0, max_accel * delta)
+	
+	# this applies friction perpendicular to direction of movement, making controls feel like doom with air control
+	# applying friction in accelerate??? WTF (heheh friction go BRRRRRRRR)
+	if direction != Vector3.ZERO:
+		var vel_along_direction := velocity.project(direction)
+		var vel_perp_direction := velocity - vel_along_direction
+		var speed_perp_direction := vel_perp_direction.length()
+		if speed_perp_direction != 0.0:
+			# control is used for extra friction below _stop_speed, makes for snappier movement
+			var control := max(1.0, speed_perp_direction * 0.9)
+			var drop := control * 2.0 * delta
+			vel_perp_direction *= max(speed_perp_direction - drop, 0.0) / speed_perp_direction
+
+		velocity = vel_along_direction + vel_perp_direction
+	
+	return velocity + direction * add_speed
+</code></pre>
+
+<pre><code class="gdscript"> # Movement.gd 
+	
+# takes current velocity, friction amount, speed below which static friction is applied, and delta
+# and returns the new velocity after friction
+func friction(velocity: Vector3, friction: float, _speed_stop: float, delta: float) -> Vector3:
+	var speed := velocity.length()
+	if speed != 0.0:
+		var control := max(_speed_stop, speed)
+		var drop := control * friction * delta
+		velocity *= max(speed - drop, 0.0) / speed
+	return velocity
+</code></pre>
+
+<p>
+	<code>FloorProximityArea</code> is an area that is used by <code>Movement</code> to check if we're close to the floor.
+</p>
+<p>
+	<code>Dash</code> handles all the logic when the player dashes. During a dash the player's <code>gravity_scale</code> is set to 0.0 
+	and is set back to the original value after the dash. the player's <code>linear_velocity</code> is set to <code>speed_dash</code> along the player's movement direction.
+	Any collisions that happen during the dash will be handled by the <code>RigidBody</code> for free.
+</p>
+<p>
+	<code>FpCamera</code> is the FpCamera rig that we created, instanced onto <code>GDoomGuy</code>.
+</p>
+<p>
+	<code>Interpolate3D</code> interpolates the camera movement when the framerate is higher than the physics framerate. 
+	Its a bit complicated and hard to explain. Look at <a href="https://youtu.be/qtV8JEIq0Ng" target="_blank" rel="noopener noreferrer">kinematic soup's video</a> 
+	or <a href="https://www.kinematicsoup.com/news/2016/8/9/rrypp5tkubynjwxhxjzd42s3o034o8?utm_type=SMVideo" target="_blank" rel="noopener noreferrer">his blog</a> 
+	or even <a href="https://youtu.be/pqrD3B75yKo" target="_blank" rel="noopener noreferrer">grabaj's video</a> on what im talking about.
+</p>
+
+<p class="aligncenter">
+	<img class="img-fluid" src="{{site.baseurl}}/img/posts/2021-02-5-doom-eternal-in-godot-pt1/gdoomguy_scene.jpg" alt="Gdoomguy scene view">
+	<span class="caption text-muted">GDoomGuy scene view.</span>
+</p>
+
+
+<p>This is the script on <code>GDoomGuy</code></p>
+
+<pre><code class="gdscript">extends RigidBody
+
+export(float, 0.0, 90.0) var floor_angle := 40.0
+
+# angle between floor normal and y-up
+# 0deg to 40deg is floor
+# 40deg to 90 deg is wall
+onready var cos_floor_angle := cos(deg2rad(floor_angle))
+onready var player_input := $PlayerInput
+onready var camera := $FpCamera
+
+var physics_state: PhysicsDirectBodyState
+var floor_contact_indices := []
+var wall_contact_indices := []
+
+func get_move_direction() -> Vector3:
+	var camera_hrot := camera.get_hrot() as float
+	# also rotate the stair detection rig
+	$StairDetection.global_transform.basis = camera.get_hbasis()
+	return player_input.movement.rotated(Vector3.UP, camera_hrot)
+
+func get_look_direction() -> Vector3:
+	return -camera.get_basis().z
+
+func floor_in_contact() -> bool:
+	return len(floor_contact_indices) > 0
+
+func wall_in_contact() -> bool:
+	return len(wall_contact_indices) > 0
+
+func update_contact_indices(state: PhysicsDirectBodyState):
+	floor_contact_indices = []
+	wall_contact_indices = []
+	for idx in range(state.get_contact_count()):
+		var normal := state.get_contact_local_normal(idx)
+		var abs_cos_theta := normal.dot(Vector3.UP)
+		if abs_cos_theta >= cos_floor_angle and abs_cos_theta <= 1.0:
+			floor_contact_indices.append(idx)
+		elif abs_cos_theta >= 0.0 and abs_cos_theta < cos_floor_angle:
+			wall_contact_indices.append(idx)
+
+func get_best_floor_index() -> int:
+	if len(floor_contact_indices) == 0:
+		return -1
+	var floor_index: int = floor_contact_indices[0]
+	for idx in floor_contact_indices:
+		if physics_state.get_contact_local_normal(idx).y > physics_state.get_contact_local_normal(floor_index).y:
+			floor_index = idx
+	return floor_index
+
+func get_best_wall_index() -> int:
+	if len(wall_contact_indices) == 0:
+		return -1
+	var wall_index: int = wall_contact_indices[0]
+	for idx in wall_contact_indices:
+		if physics_state.get_contact_local_normal(idx).y < physics_state.get_contact_local_normal(wall_index).y:
+			wall_index = idx
+	return wall_index
+
+func _integrate_forces(state: PhysicsDirectBodyState) -> void:
+	physics_state = state
+	var delta := state.get_step()
+	player_input.update(delta)
+	update_contact_indices(state)
+	
+	$Movement.apply_movement(self)
+	$Dash.apply_movement(self)
+</code></pre>
+
+<p>@TODO: explain how the script works</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <pre><code class="cpp">&#47;&#47; DaysEnumsDef.h, call it whatever tf you want.
+#define REGISTER_ENUM(x) x, &#47;&#47; It expands to literally x followed by a comma
+
+enum Days{
+	#include "DaysEnums.incl" &#47;&#47; Does a literal copy paste into here.
+	NUM_DAYS &#47;&#47; You dont want to register this in the DaysEnums.h file.
+};
+
+#undef REGISTER_ENUM &#47;&#47; Redundant i guess.
+#define REGISTER_ENUM(x) #x, &#47;&#47; Preprocessor wizardry replaces #x with the string version of x, literally.
+
+const char* const DaysToString[] = {
+	#include "DaysEnums.incl"
+	"INVALID_DAY" &#47;&#47; Pretty sure you know why.
+};
+
+#undef REGISTER_ENUM &#47;&#47; Undefine it to not pollute the codebase.
+</code></pre> -->
+
+<!-- <p>Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center because every point, or none, is center — an equal earth which all men occupy as equals. The airman's earth, if free men make it, will be truly round: a globe in practice, not in theory.</p>
+<h2 class="section-heading">The Final Frontier</h2>
+<blockquote class="blockquote">The dreams of yesterday are the hopes of today and the reality of tomorrow. Science has not yet mastered prophecy. We predict too much for the next year and yet far too little for the next ten.</blockquote>
+<img class="img-fluid" src="https://source.unsplash.com/Mn9Fa_wQH-M/800x450" alt="Demo Image">
+<span class="caption text-muted">To go places and do things that have never been done before – that’s what living is all about.</span> -->
