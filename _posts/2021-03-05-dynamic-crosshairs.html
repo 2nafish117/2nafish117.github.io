@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Dynamic crosshairs with shaders"
-subtitle: "but why?"
+subtitle: "todo subtitle"
 date: 2021-03-05 12:00:00 +0530
 background: '/img/godot-code-bg.jpg'
 ---
@@ -18,94 +18,95 @@ background: '/img/godot-code-bg.jpg'
 <!-- see this for charecter encodings in html -->
 <!-- https://www.freeformatter.com/html-entities.html -->
 
-<p>Do you just want to define your enums once, and have their strings generated automatically? Well you can do that, if you're willing to fuck with the cpp preprocessor.</p>
-<p>Lets first start with wtf im even talking about. Here is a code snippet.</p>
+<p>
+	You ever feel like you want your crosshair.png to be dynamic and show some movement?
+	Yeah? you can do it with some simple shaders.
+</p>
+<p>
+	I'll be using plain old glsl in my code snippets here, feel free to port it to any other shading language out there.
+	If you want to try it out right in your browser check out the <a href="http://editor.thebookofshaders.com/">book of shaders editor</a>.
+	<a href="http://thebookofshaders.com/">The Book of Shaders</a> is also an excellent resource if you want to learn more about shaders.
+</p>
 
-<pre><code class="cpp">&#47;&#47; Days.h
-enum Days {
-	MONDAY = 0,
-	TUESDAY,
-	WEDNESDAY,
-	THURSDAY,
-	FRIDAY,
-	SATURDAY,
-	SUNDAY,
-	NUM_DAYS
-};
+<h2 class="section-heading">The Idea</h2>
+<p>
+	The basic idea of creating shapes in a fragment shader is to make a mask using shader functions that fills the crosshair shape you want, 
+	and then animate this mask using a time uniform or another uniform. 
+</p>
+<p>
+	You can create multiple simple masks and then put them together to make composite masks.
+	You can sometimes get away with texture masks instead of creating them by shader code. 
+	But the beauty of shader masks are that they can be scaled arbitrarily without loss in quality. 
+	Finally this mask can be multiplied with a color to get your final crosshair.
+</p>
 
-const char* const DaysToString[] = {
-	"MONDAY",
-	"TUESDAY",
-	"WEDNESDAY",
-	"THURSDAY",
-	"FRIDAY",
-	"SATURDAY",
-	"SUNDAY",
-	"INVALID_DAY"
-};
+<h2 class="section-heading">The Code</h2>
+<p>
+	Here are a few snippets of simple masks that can be used to make more complex masks. 
+	Each of them is run for every pixel on the crosshair and returns some value in the range <code>[0.0, 1.0]</code>.
+	1.0 implies the pixel is colored, 0.0 means the pixel is transparent. (It's a mask bruh)
+</p>
 
-&#47;&#47; usage: DaysToString[FRIDAY] -> gives you "FRIDAY"
+<pre><code class="glsl">&#47;&#47; Simple Masks
+#define SMOOTH_AMOUNT 0.005 &#47;&#47; Smooth the edges of the masks
+
+float mask_circle(vec2 st, vec2 center, float radius) {
+	return 1.0 - smoothstep(radius - SMOOTH_AMOUNT, radius + SMOOTH_AMOUNT, length(st - center));
+}
+
+float mask_ellipse(vec2 st, vec2 center, float r1, float r2) {
+	st -= center;
+	float d = st.x * st.x / (r1 * r1) + st.y * st.y / (r2 * r2);
+	return 1.0 - smoothstep(1.0 - 10.0 * SMOOTH_AMOUNT, 1.0 + 10.0 * SMOOTH_AMOUNT, d);
+}
+
+float mask_ring(vec2 st, vec2 center, float inner, float outer) {
+	return (1.0 - mask_circle(st, center, inner)) * mask_circle(st, center, outer);
+}
+
+float mask_plus(vec2 st, vec2 center, float width) {
+	return 1.0 - min(
+		smoothstep(width - SMOOTH_AMOUNT, width + SMOOTH_AMOUNT, abs(st.x)), 
+		smoothstep(width - SMOOTH_AMOUNT, width + SMOOTH_AMOUNT, abs(st.y))
+	);
+}
+
+float mask_square(vec2 st, vec2 center, float width) {
+	return 1.0 - max(
+		smoothstep(width - SMOOTH_AMOUNT, width + SMOOTH_AMOUNT, abs(st.x)), 
+		smoothstep(width - SMOOTH_AMOUNT, width + SMOOTH_AMOUNT, abs(st.y))
+	);
+}
 </code></pre>
 
-<p>So whats the problem with this?</p>
 <p>
-	Well for starters if you need to add another day, then you need to make changes in the code in two places. 
-	Might not look too difficult when you have so few enums, but think about maintaining them when you have more than a handful. Or being the forgetful shit you are, you may just forget.
-	Also, if you re-arrange the days, you need to re-arrange them in the strings as well. Change the enum spelling? Guess what, you need to change it in the strings.	
+	You can see the extensive use of simple shader functions like 
+	<code>smoothstep</code>, <code>min</code>, <code>max</code>, and <code>abs</code>.
+	The <code>mask_plus</code> works by doing a union of a vertical and horizontal strip to form a plus.
+	The <code>mask_square</code> works in the exact opposite way, it uses the intersection of the vertical and horizontal strip to form a square.
+	The <code>mask_ring</code> works by using two <code>mask_circle</code> calls and cutting out the inner circle from the outer circle.
+	You can see now how you can combine multiple masks, this can be generalised similar to set theory.
 </p>
 
-<p>
-	A good programmer always finds new ways to keep his sanity (until that new solution comes to bite him in the ass). What am i talking about?
-	Using the cpp preprocessor of course. Trade one evil for another.
-</p>
+<pre><code class="cpp">&#47;&#47; Mask Arithmetic?
+mask = 1.0 - mask   &#47;&#47; inverse of mask
 
-<p>The solution I provide is not my own, i just saw it from this <a href="https://youtu.be/iVBCBcEANBc">video</a> and wanted to document it in my blog.</p>
+&#47;&#47; union and intersection using max, min
+mask = max(mask1, mask2) &#47;&#47; mask1 union mask2
+mask = min(mask1, mask2) &#47;&#47; mask1 intersection mask2
 
-<p>First you make a file containing this .. shit.</p>
+&#47;&#47; union and intersection using addition, multiplication
+mask = clamp(0.0, 1.0, mask1 + mask2) &#47;&#47; mask1 union mask2
+mask = mask1 * mask2 				&#47;&#47; mask1 intersection mask2
 
-<pre><code class="cpp">&#47;&#47; DaysEnums.incl, call it whatever tf you want.
-REGISTER_ENUM(MONDAY = 0) &#47;&#47; You can do the "= 0" as well
-REGISTER_ENUM(TUESDAY)
-REGISTER_ENUM(WEDNESDAY)
-REGISTER_ENUM(THURSDAY)
-REGISTER_ENUM(FRIDAY)
-REGISTER_ENUM(SATURDAY)
-REGISTER_ENUM(SUNDAY)
+&#47;&#47; here intersection can be any of the methods shown above
+mask = mask1 intersection (1.0 - mask2) &#47;&#47; mask1 set-subtract mask2
 </code></pre>
 
-<p> Dont lose your shit yet, next code snippet actually defines <code>REGISTER_ENUM</code>. Notice it contains no commas, semicolons. </p>
-<p>And in a second file, this .. </p>
-
-<pre><code class="cpp">&#47;&#47; DaysEnumsDef.h, call it whatever tf you want.
-#define REGISTER_ENUM(x) x, &#47;&#47; It expands to literally x followed by a comma
-
-enum Days{
-	#include "DaysEnums.incl" &#47;&#47; Does a literal copy paste into here.
-	NUM_DAYS &#47;&#47; You dont want to register this in the DaysEnums.h file.
-};
-
-#undef REGISTER_ENUM &#47;&#47; Redundant i guess.
-#define REGISTER_ENUM(x) #x, &#47;&#47; Preprocessor wizardry replaces #x with the string version of x, literally.
-
-const char* const DaysToString[] = {
-	#include "DaysEnums.incl"
-	"INVALID_DAY" &#47;&#47; Pretty sure you know why.
-};
-
-#undef REGISTER_ENUM &#47;&#47; Undefine it to not pollute the codebase.
-</code></pre>
-	
 <p>
-	TLDR: basically we are redefining the macro <code>REGISTER_ENUM</code> to first list out the enum definitions, and then redefining it to list out the same "word" within doubleqotes.
-	This allows you to just list the enums once and let the preprocessor make sure that the strings and the enum is being defined in the same order, Macro magic.
+	Who knows, maybe more of the boolean algebra works on these? Maybe de-morgans laws. 
+	An idea for another post perhaps.
 </p>
-
-<p>
-	Now its your choice if you want to use this or not. Is it really simpler than just doing it yourself? You be the judge of that. Preprocessor magic shit 
-	like this is what makes newcomers to your codebase bleed their eyes out, so maybe comment this shit out?
-	And with that ill see y'all in the next post.
-</p>
-
 
 <!-- <p>Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center because every point, or none, is center — an equal earth which all men occupy as equals. The airman's earth, if free men make it, will be truly round: a globe in practice, not in theory.</p>
 <h2 class="section-heading">The Final Frontier</h2>
