@@ -1,0 +1,114 @@
+---
+layout: post
+title: "Dynamic crosshairs with shaders"
+subtitle: "but why?"
+date: 2021-03-05 12:00:00 +0530
+background: '/img/godot-code-bg.jpg'
+---
+
+<!-- see below link for code formatting shit -->
+<!-- https://therealweblog.blogspot.com/2019/05/how-to-format-code-snippets-in-blogger.html -->
+<!-- https://github.com/highlightjs/highlight.js/blob/master/SUPPORTED_LANGUAGES.md -->
+<!-- this is all code formatting shit -->
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/atom-one-dark-reasonable.min.css' rel='stylesheet'/>
+<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js'></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- see this for charecter encodings in html -->
+<!-- https://www.freeformatter.com/html-entities.html -->
+
+<p>Do you just want to define your enums once, and have their strings generated automatically? Well you can do that, if you're willing to fuck with the cpp preprocessor.</p>
+<p>Lets first start with wtf im even talking about. Here is a code snippet.</p>
+
+<pre><code class="cpp">&#47;&#47; Days.h
+enum Days {
+	MONDAY = 0,
+	TUESDAY,
+	WEDNESDAY,
+	THURSDAY,
+	FRIDAY,
+	SATURDAY,
+	SUNDAY,
+	NUM_DAYS
+};
+
+const char* const DaysToString[] = {
+	"MONDAY",
+	"TUESDAY",
+	"WEDNESDAY",
+	"THURSDAY",
+	"FRIDAY",
+	"SATURDAY",
+	"SUNDAY",
+	"INVALID_DAY"
+};
+
+&#47;&#47; usage: DaysToString[FRIDAY] -> gives you "FRIDAY"
+</code></pre>
+
+<p>So whats the problem with this?</p>
+<p>
+	Well for starters if you need to add another day, then you need to make changes in the code in two places. 
+	Might not look too difficult when you have so few enums, but think about maintaining them when you have more than a handful. Or being the forgetful shit you are, you may just forget.
+	Also, if you re-arrange the days, you need to re-arrange them in the strings as well. Change the enum spelling? Guess what, you need to change it in the strings.	
+</p>
+
+<p>
+	A good programmer always finds new ways to keep his sanity (until that new solution comes to bite him in the ass). What am i talking about?
+	Using the cpp preprocessor of course. Trade one evil for another.
+</p>
+
+<p>The solution I provide is not my own, i just saw it from this <a href="https://youtu.be/iVBCBcEANBc">video</a> and wanted to document it in my blog.</p>
+
+<p>First you make a file containing this .. shit.</p>
+
+<pre><code class="cpp">&#47;&#47; DaysEnums.incl, call it whatever tf you want.
+REGISTER_ENUM(MONDAY = 0) &#47;&#47; You can do the "= 0" as well
+REGISTER_ENUM(TUESDAY)
+REGISTER_ENUM(WEDNESDAY)
+REGISTER_ENUM(THURSDAY)
+REGISTER_ENUM(FRIDAY)
+REGISTER_ENUM(SATURDAY)
+REGISTER_ENUM(SUNDAY)
+</code></pre>
+
+<p> Dont lose your shit yet, next code snippet actually defines <code>REGISTER_ENUM</code>. Notice it contains no commas, semicolons. </p>
+<p>And in a second file, this .. </p>
+
+<pre><code class="cpp">&#47;&#47; DaysEnumsDef.h, call it whatever tf you want.
+#define REGISTER_ENUM(x) x, &#47;&#47; It expands to literally x followed by a comma
+
+enum Days{
+	#include "DaysEnums.incl" &#47;&#47; Does a literal copy paste into here.
+	NUM_DAYS &#47;&#47; You dont want to register this in the DaysEnums.h file.
+};
+
+#undef REGISTER_ENUM &#47;&#47; Redundant i guess.
+#define REGISTER_ENUM(x) #x, &#47;&#47; Preprocessor wizardry replaces #x with the string version of x, literally.
+
+const char* const DaysToString[] = {
+	#include "DaysEnums.incl"
+	"INVALID_DAY" &#47;&#47; Pretty sure you know why.
+};
+
+#undef REGISTER_ENUM &#47;&#47; Undefine it to not pollute the codebase.
+</code></pre>
+	
+<p>
+	TLDR: basically we are redefining the macro <code>REGISTER_ENUM</code> to first list out the enum definitions, and then redefining it to list out the same "word" within doubleqotes.
+	This allows you to just list the enums once and let the preprocessor make sure that the strings and the enum is being defined in the same order, Macro magic.
+</p>
+
+<p>
+	Now its your choice if you want to use this or not. Is it really simpler than just doing it yourself? You be the judge of that. Preprocessor magic shit 
+	like this is what makes newcomers to your codebase bleed their eyes out, so maybe comment this shit out?
+	And with that ill see y'all in the next post.
+</p>
+
+
+<!-- <p>Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center because every point, or none, is center — an equal earth which all men occupy as equals. The airman's earth, if free men make it, will be truly round: a globe in practice, not in theory.</p>
+<h2 class="section-heading">The Final Frontier</h2>
+<blockquote class="blockquote">The dreams of yesterday are the hopes of today and the reality of tomorrow. Science has not yet mastered prophecy. We predict too much for the next year and yet far too little for the next ten.</blockquote>
+<img class="img-fluid" src="https://source.unsplash.com/Mn9Fa_wQH-M/800x450" alt="Demo Image">
+<span class="caption text-muted">To go places and do things that have never been done before – that’s what living is all about.</span> -->
