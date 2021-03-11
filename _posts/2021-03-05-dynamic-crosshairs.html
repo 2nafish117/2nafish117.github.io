@@ -14,6 +14,8 @@ background: '/img/godot-code-bg.jpg'
 <script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js'></script>
 <script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js'></script>
 <script>hljs.initHighlightingOnLoad();</script>
+<!-- glslViewer -->
+<script type="text/javascript" src="https://rawgit.com/patriciogonzalezvivo/glslCanvas/master/dist/GlslCanvas.js"></script>
 
 <!-- see this for charecter encodings in html -->
 <!-- https://www.freeformatter.com/html-entities.html -->
@@ -22,6 +24,7 @@ background: '/img/godot-code-bg.jpg'
 	You ever feel like you want your crosshair.png to be dynamic and show some movement?
 	Yeah? you can do it with some simple shaders.
 </p>
+<canvas class="glslCanvas" data-fragment-url="shader.frag" width="500" height="500"></canvas>
 <p>
 	I'll be using plain old glsl in my code snippets here, feel free to port it to any other shading language out there.
 	If you want to try it out right in your browser check out the <a href="http://editor.thebookofshaders.com/">book of shaders editor</a>.
@@ -44,7 +47,7 @@ background: '/img/godot-code-bg.jpg'
 <p>
 	Here are a few snippets of simple masks that can be used to make more complex masks. 
 	Each of them is run for every pixel on the crosshair and returns some value in the range <code>[0.0, 1.0]</code>.
-	1.0 implies the pixel is colored, 0.0 means the pixel is transparent. (It's a mask bruh)
+	A value of 1.0 implies the pixel is colored, 0.0 means the pixel is transparent. (It's a mask bruh)
 </p>
 
 <pre><code class="glsl">&#47;&#47; Simple Masks
