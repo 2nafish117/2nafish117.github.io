@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Dynamic crosshairs with shaders"
-subtitle: "Hahaha crosshair go brrrrrrrrrrrr"
+subtitle: "Hahaha crosshair go brrrrrrr"
 date: 2021-03-05 12:00:00 +0530
 background: '/img/godot-code-bg.jpg'
 ---
@@ -32,6 +32,7 @@ background: '/img/godot-code-bg.jpg'
 </p>
 
 <p>
+	If you can't see the above shader try using a desktop browser.<br> 
 	I'll be using plain old glsl in my code snippets here, feel free to port it to any other shading language out there.
 	If you want to try it out right in your browser check out <a href="http://editor.thebookofshaders.com/">book of shaders editor</a>.
 	<a href="http://thebookofshaders.com/">The Book of Shaders</a> is also an excellent resource if you want to learn more about shaders.
@@ -103,19 +104,19 @@ float mask_square(vec2 st, vec2 center, float width) {
 	<tr>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/circle.frag" width="150" height="150"></canvas>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/circle.frag" width="100" height="100"></canvas>
 			<span class="caption text-muted">Circular mask.</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ellipse.frag" width="150" height="150"></canvas>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ellipse.frag" width="100" height="100"></canvas>
 			<span class="caption text-muted">Elliptical mask.</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ring.frag" width="150" height="150"></canvas>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ring.frag" width="100" height="100"></canvas>
 			<span class="caption text-muted">Ring mask.</span>
 			</p>
 		</td>
@@ -123,20 +124,20 @@ float mask_square(vec2 st, vec2 center, float width) {
 	<tr>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/plus.frag" width="150" height="150"></canvas>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/plus.frag" width="100" height="100"></canvas>
 			<span class="caption text-muted">Plus mask.</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square.frag" width="150" height="150"></canvas>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square.frag" width="100" height="100"></canvas>
 			<span class="caption text-muted">Square mask.</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/polygon.frag" width="150" height="150"></canvas>
-			<span class="caption text-muted">Polygon with varying sides.</span>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/polygon.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Polygon masks.</span>
 			</p>
 		</td>
 	</tr>
@@ -151,7 +152,7 @@ float mask_square(vec2 st, vec2 center, float width) {
 	You can see now how you can combine multiple masks, this can be generalised similar to set theory!!?
 </p>
 
-<pre><code class="cpp">&#47;&#47; Mask Arithmetic? WTF
+<pre><code class="glsl">&#47;&#47; Mask Arithmetic? WTF
 mask = 1.0 - mask   &#47;&#47; inverse of mask
 
 &#47;&#47; union and intersection using max, min
@@ -179,27 +180,27 @@ mask = mask1 intersection (1.0 - mask2) &#47;&#47; mask1 set-subtract mask2
 	<tr>
 		<td>
 			<p class="aligncenter">
-			<canvas id="mask_square" class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_translate.frag" width="150" height="150"></canvas>
-			<span class="caption text-muted">Mask being translated</span>
+			<canvas id="mask_square" class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_translate.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Translated mask</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_scale.frag" width="150" height="150"></canvas>
-			<span class="caption text-muted">Mask being scaled</span>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_scale.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Scaled mask</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_rotate.frag" width="150" height="150"></canvas>
-			<span class="caption text-muted">Mask being rotated</span>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_rotate.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Rotated mask</span>
 			</p>
 		</td>
 	</tr>
 </table>
 
 <p>These are the glsl functions that transform the uv space.</p>
-<pre><code class="cpp">&#47;&#47; transform functions go BRRRRR
+<pre><code class="glsl">&#47;&#47; transform functions go BRRRRR
 vec2 translate(vec2 uv, vec2 t) {
 	return uv + t;
 }
@@ -237,6 +238,12 @@ vec2 rotate(vec2 uv, float rotation, vec2 mid) {
 	<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/regular_fucking_crosshair.frag" width="200" height="200"></canvas>
 	<span class="caption text-muted">A very fucking unoriginal crosshair.</span>
 </p>
+
+<p class="aligncenter">
+	<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/doom_ballista.frag" width="200" height="200"></canvas>
+	<span class="caption text-muted">Doom ballista reticule.</span>
+</p>
+
 
 <p>
 	TLDR: <a href="{{site.baseurl}}/assets/shaders/masks.frag">masks and transformations</a>, 

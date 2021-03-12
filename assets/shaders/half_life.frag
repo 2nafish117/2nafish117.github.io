@@ -53,14 +53,16 @@ float health_mask(vec2 st, float amount) {
 void main() {
     vec2 st = gl_FragCoord.xy/u_resolution.xy - vec2(0.5, 0.5);
 
-	float ammo = sin(0.5 * u_time + 0.3);
+	float ammo = sin(0.5 * u_time);
 	ammo *= ammo;
+    ammo += 0.1;
     float health = sin(0.5 * u_time);
 	health *= health;
+    health += 0.1;
 
 	float health_mask = health_mask(st, health);
     float ammo_mask = ammo_mask(st, ammo);
-    float spread = abs(sin(15.0 * u_time)) * 0.05 + 0.05;
+    float spread = abs(sin(2.0 * u_time) + sin(15.0 * u_time)) * 0.05 + 0.05;
     float thickness = 0.007;
     float length = 0.1;
     float reticule_mask = mask_ring(st, vec2(0.0, 0.0), spread, spread + length) * mask_plus(st, vec2(0.0, 0.0), thickness);
