@@ -99,38 +99,44 @@ float mask_square(vec2 st, vec2 center, float width) {
 </code></pre>
 
 
-<table style="width:100%">
+<table style="table-layout:fixed;width:100%">
 	<tr>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/circle.frag" width="100" height="100"></canvas>
-			<span class="caption text-muted">Circular mask with radius 0.4</span>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/circle.frag" width="150" height="150"></canvas>
+			<span class="caption text-muted">Circular mask.</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ellipse.frag" width="100" height="100"></canvas>
-			<span class="caption text-muted">Elliptical mask with r1 0.2 and r2 0.4</span>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ellipse.frag" width="150" height="150"></canvas>
+			<span class="caption text-muted">Elliptical mask.</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ring.frag" width="100" height="100"></canvas>
-			<span class="caption text-muted">Ring mask with inner 0.3 and outer 0.4</span>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ring.frag" width="150" height="150"></canvas>
+			<span class="caption text-muted">Ring mask.</span>
 			</p>
 		</td>
 	</tr>
 	<tr>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/plus.frag" width="100" height="100"></canvas>
-			<span class="caption text-muted">Plus mask with width 0.2</span>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/plus.frag" width="150" height="150"></canvas>
+			<span class="caption text-muted">Plus mask.</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square.frag" width="100" height="100"></canvas>
-			<span class="caption text-muted">Square mask with width 0.2</span>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square.frag" width="150" height="150"></canvas>
+			<span class="caption text-muted">Square mask.</span>
+			</p>
+		</td>
+		<td>
+			<p class="aligncenter">
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/polygon.frag" width="150" height="150"></canvas>
+			<span class="caption text-muted">Polygon with varying sides.</span>
 			</p>
 		</td>
 	</tr>
@@ -169,28 +175,29 @@ mask = mask1 intersection (1.0 - mask2) &#47;&#47; mask1 set-subtract mask2
 	Another trick to move your masks is transforming the uvs before passing them into the masks. You can do stuff like translating, rotating and scaling, the masks.
 </p>
 
-<table style="width:100%">
+<table style="table-layout:fixed;width:100%">
 	<tr>
 		<td>
 			<p class="aligncenter">
-			<canvas id="mask_square" class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_translate.frag" width="100" height="100"></canvas>
+			<canvas id="mask_square" class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_translate.frag" width="150" height="150"></canvas>
 			<span class="caption text-muted">Mask being translated</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_scale.frag" width="100" height="100"></canvas>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_scale.frag" width="150" height="150"></canvas>
 			<span class="caption text-muted">Mask being scaled</span>
 			</p>
 		</td>
 		<td>
 			<p class="aligncenter">
-			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_rotate.frag" width="100" height="100"></canvas>
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_rotate.frag" width="150" height="150"></canvas>
 			<span class="caption text-muted">Mask being rotated</span>
 			</p>
 		</td>
 	</tr>
 </table>
+
 <p>These are the glsl functions that transform the uv space.</p>
 <pre><code class="cpp">&#47;&#47; transform functions go BRRRRR
 vec2 translate(vec2 uv, vec2 t) {
@@ -231,7 +238,13 @@ vec2 rotate(vec2 uv, float rotation, vec2 mid) {
 	<span class="caption text-muted">A very fucking unoriginal crosshair.</span>
 </p>
 
-
+<p>
+	TLDR: <a href="{{site.baseurl}}/assets/shaders/masks.frag">masks and transformations</a>, 
+	<a href="{{site.baseurl}}/assets/shaders/half_life.frag">Half life</a>, 
+	<a href="{{site.baseurl}}/assets/shaders/needler.frag">Needler</a>, 
+	<a href="{{site.baseurl}}/assets/shaders/boltshot.frag">Halo 5's boltshot reticule</a>, 
+	<a href="{{site.baseurl}}/assets/shaders/regular_fucking_crosshair.frag">Regular fucking crosshair</a>
+</p>
 
 <!-- <p>Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center because every point, or none, is center — an equal earth which all men occupy as equals. The airman's earth, if free men make it, will be truly round: a globe in practice, not in theory.</p>
 <h2 class="section-heading">The Final Frontier</h2>

@@ -32,13 +32,13 @@ float needler_mask(vec2 st, float spread) {
         (1.0 - mask_ellipse(st, vec2(spread,0.0), e2.x, e2.y)) * 
         step(spread, st.x);
     
-    left = max(left, max(mask, mask_circle(st + vec2(0.17 + spread, 0.0), vec2(0.0), 0.015)));
+    left = max(left, max(mask, mask_circle(st + vec2(0.2 + spread, 0.0), vec2(0.0), 0.015)));
     
     float right = mask_ellipse(st, vec2(-spread,0.0), e1.x, e1.y) * 
         (1.0 - mask_ellipse(st, vec2(-spread,0.0), e2.x, e2.y)) * 
         (1.0 - step(-spread, st.x));
     
-    right = max(right, max(mask, mask_circle(st + vec2(-0.17 - spread, 0.0), vec2(0.0), 0.015)));
+    right = max(right, max(mask, mask_circle(st + vec2(-0.2 - spread, 0.0), vec2(0.0), 0.015)));
         
     mask = max(mask, left);
     mask = max(mask, right);
