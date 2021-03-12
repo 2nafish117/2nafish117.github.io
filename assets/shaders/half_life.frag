@@ -1,6 +1,3 @@
-// Author:
-// Title:
-
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -42,13 +39,13 @@ float default_crosshair_mask(vec2 st, float spread, float thickness, float lengt
 }
 
 float ammo_mask(vec2 st, float amount) {
-    float mask = mask_ring(st, vec2(0.0), 0.25, 0.3);
+    float mask = mask_ring(st, vec2(0.0), 0.28, 0.3);
     float radial_right = min(1.0, mask_radial(st, vec2(0.0), amount) + (1.0 - mask_radial(st, vec2(0.0), TWO_PI - amount)));
     return mask * radial_right;
 }
 
 float health_mask(vec2 st, float amount) {
-    float mask = mask_ring(st, vec2(0.0), 0.25, 0.3);
+    float mask = mask_ring(st, vec2(0.0), 0.28, 0.3);
     float radial_left = min(1.0, mask_radial(st, vec2(0.0), PI + amount) * (1.0 - mask_radial(st, vec2(0.0), PI - amount)));
     return mask * radial_left;
 }
