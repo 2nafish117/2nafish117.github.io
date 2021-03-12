@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Dynamic crosshairs with shaders"
-subtitle: "todo subtitle"
+subtitle: "Hahaha crosshair go brrrrrrrrrrrr"
 date: 2021-03-05 12:00:00 +0530
 background: '/img/godot-code-bg.jpg'
 ---
@@ -21,66 +21,120 @@ background: '/img/godot-code-bg.jpg'
 <!-- https://www.freeformatter.com/html-entities.html -->
 
 <p>
-	You ever feel like you want your crosshair.png to be dynamic and show some movement?
-	Yeah? you can do it with some simple shaders.
+	Shaders are fucking cool, dynamic crosshairs too.  
+	So how about we use some shader stuff to make dynamic crosshairs like the one below.
 </p>
-<canvas class="glslCanvas" data-fragment-url="shader.frag" width="500" height="500"></canvas>
+
+<p class="aligncenter">
+	<!-- @TODO make a cool fucking shader -->
+	<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/half_life.frag" width="250" height="250"></canvas>
+	<span class="caption text-muted">Health on the left, ammo on the right.</span>
+</p>
+
 <p>
 	I'll be using plain old glsl in my code snippets here, feel free to port it to any other shading language out there.
-	If you want to try it out right in your browser check out the <a href="http://editor.thebookofshaders.com/">book of shaders editor</a>.
+	If you want to try it out right in your browser check out <a href="http://editor.thebookofshaders.com/">book of shaders editor</a>.
 	<a href="http://thebookofshaders.com/">The Book of Shaders</a> is also an excellent resource if you want to learn more about shaders.
+	Shout out to <a href="https://github.com/patriciogonzalezvivo/glslCanvas">glslCanvas.js</a>. 
+	It is what is being used to render the shaders on my blog. 
 </p>
 
 <h2 class="section-heading">The Idea</h2>
 <p>
 	The basic idea of creating shapes in a fragment shader is to make a mask using shader functions that fills the crosshair shape you want, 
-	and then animate this mask using a time uniform or another uniform. 
+	and then animate this mask using time or another uniform. 
 </p>
 <p>
 	You can create multiple simple masks and then put them together to make composite masks.
 	You can sometimes get away with texture masks instead of creating them by shader code. 
-	But the beauty of shader masks are that they can be scaled arbitrarily without loss in quality. 
+	But the beauty of anything made with a shader are that they can be scaled arbitrarily without loss in quality. 
 	Finally this mask can be multiplied with a color to get your final crosshair.
 </p>
 
 <h2 class="section-heading">The Code</h2>
 <p>
-	Here are a few snippets of simple masks that can be used to make more complex masks. 
-	Each of them is run for every pixel on the crosshair and returns some value in the range <code>[0.0, 1.0]</code>.
-	A value of 1.0 implies the pixel is colored, 0.0 means the pixel is transparent. (It's a mask bruh)
+	Here are a few simple masks that can be used to make more complex masks and how they look.
 </p>
 
-<pre><code class="glsl">&#47;&#47; Simple Masks
-#define SMOOTH_AMOUNT 0.005 &#47;&#47; Smooth the edges of the masks
-
+<pre><code class="glsl">&#47;&#47; circle mask
 float mask_circle(vec2 st, vec2 center, float radius) {
-	return 1.0 - smoothstep(radius - SMOOTH_AMOUNT, radius + SMOOTH_AMOUNT, length(st - center));
+	return 1.0 - smoothstep(radius - SMOOTH_AMOUNT, 
+	radius + SMOOTH_AMOUNT, 
+	length(st - center));
 }
 
+&#47;&#47; elliptical mask
 float mask_ellipse(vec2 st, vec2 center, float r1, float r2) {
 	st -= center;
 	float d = st.x * st.x / (r1 * r1) + st.y * st.y / (r2 * r2);
-	return 1.0 - smoothstep(1.0 - 10.0 * SMOOTH_AMOUNT, 1.0 + 10.0 * SMOOTH_AMOUNT, d);
+	return 1.0 - smoothstep(1.0 - 10.0 * SMOOTH_AMOUNT, 
+		1.0 + 10.0 * SMOOTH_AMOUNT, d);
 }
 
-float mask_ring(vec2 st, vec2 center, float inner, float outer) {
-	return (1.0 - mask_circle(st, center, inner)) * mask_circle(st, center, outer);
+&#47;&#47; ring mask
+float mask_ring(vec2 st, vec2 center, float in, float out) {
+	return (1.0 - mask_circle(st, center, in)) * 
+		mask_circle(st, center, out);
 }
 
+&#47;&#47; plus mask
 float mask_plus(vec2 st, vec2 center, float width) {
 	return 1.0 - min(
-		smoothstep(width - SMOOTH_AMOUNT, width + SMOOTH_AMOUNT, abs(st.x)), 
-		smoothstep(width - SMOOTH_AMOUNT, width + SMOOTH_AMOUNT, abs(st.y))
+		smoothstep(width - SMOOTH_AMOUNT, 
+			width + SMOOTH_AMOUNT, abs(st.x)), 
+		smoothstep(width - SMOOTH_AMOUNT, 
+			width + SMOOTH_AMOUNT, abs(st.y))
 	);
 }
 
+&#47;&#47; square mask
 float mask_square(vec2 st, vec2 center, float width) {
 	return 1.0 - max(
-		smoothstep(width - SMOOTH_AMOUNT, width + SMOOTH_AMOUNT, abs(st.x)), 
-		smoothstep(width - SMOOTH_AMOUNT, width + SMOOTH_AMOUNT, abs(st.y))
+		smoothstep(width - SMOOTH_AMOUNT, 
+			width + SMOOTH_AMOUNT, abs(st.x)), 
+		smoothstep(width - SMOOTH_AMOUNT, 
+			width + SMOOTH_AMOUNT, abs(st.y))
 	);
 }
 </code></pre>
+
+
+<table style="width:100%">
+	<tr>
+		<td>
+			<p class="aligncenter">
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/circle.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Circular mask with radius 0.4</span>
+			</p>
+		</td>
+		<td>
+			<p class="aligncenter">
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ellipse.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Elliptical mask with r1 0.2 and r2 0.4</span>
+			</p>
+		</td>
+		<td>
+			<p class="aligncenter">
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/ring.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Ring mask with inner 0.3 and outer 0.4</span>
+			</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<p class="aligncenter">
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/plus.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Plus mask with width 0.2</span>
+			</p>
+		</td>
+		<td>
+			<p class="aligncenter">
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Square mask with width 0.2</span>
+			</p>
+		</td>
+	</tr>
+</table>
 
 <p>
 	You can see the extensive use of simple shader functions like 
@@ -88,10 +142,10 @@ float mask_square(vec2 st, vec2 center, float width) {
 	The <code>mask_plus</code> works by doing a union of a vertical and horizontal strip to form a plus.
 	The <code>mask_square</code> works in the exact opposite way, it uses the intersection of the vertical and horizontal strip to form a square.
 	The <code>mask_ring</code> works by using two <code>mask_circle</code> calls and cutting out the inner circle from the outer circle.
-	You can see now how you can combine multiple masks, this can be generalised similar to set theory.
+	You can see now how you can combine multiple masks, this can be generalised similar to set theory!!?
 </p>
 
-<pre><code class="cpp">&#47;&#47; Mask Arithmetic?
+<pre><code class="cpp">&#47;&#47; Mask Arithmetic? WTF
 mask = 1.0 - mask   &#47;&#47; inverse of mask
 
 &#47;&#47; union and intersection using max, min
@@ -110,6 +164,74 @@ mask = mask1 intersection (1.0 - mask2) &#47;&#47; mask1 set-subtract mask2
 	Who knows, maybe more of the boolean algebra works on these? Maybe de-morgans laws. 
 	An idea for another post perhaps.
 </p>
+
+<p>
+	Another trick to move your masks is transforming the uvs before passing them into the masks. You can do stuff like translating, rotating and scaling, the masks.
+</p>
+
+<table style="width:100%">
+	<tr>
+		<td>
+			<p class="aligncenter">
+			<canvas id="mask_square" class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_translate.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Mask being translated</span>
+			</p>
+		</td>
+		<td>
+			<p class="aligncenter">
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_scale.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Mask being scaled</span>
+			</p>
+		</td>
+		<td>
+			<p class="aligncenter">
+			<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/square_rotate.frag" width="100" height="100"></canvas>
+			<span class="caption text-muted">Mask being rotated</span>
+			</p>
+		</td>
+	</tr>
+</table>
+<p>These are the glsl functions that transform the uv space.</p>
+<pre><code class="cpp">&#47;&#47; transform functions go BRRRRR
+vec2 translate(vec2 uv, vec2 t) {
+	return uv + t;
+}
+
+vec2 scale(vec2 uv, vec2 s) {
+	return uv / s;
+}
+
+&#47;&#47; rotate about mid
+vec2 rotate(vec2 uv, float rotation, vec2 mid) {
+	return vec2(
+		cos(rotation) * (uv.x - mid.x) + 
+		sin(rotation) * (uv.y - mid.y) + mid.x,
+		cos(rotation) * (uv.y - mid.y) - 
+		sin(rotation) * (uv.x - mid.x) + mid.y
+	);
+}
+</code></pre>
+
+<p>
+	Here are a few more crosshairs and fun shaders to look at.
+</p>
+
+<p class="aligncenter">
+	<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/needler.frag" width="200" height="200"></canvas>
+	<span class="caption text-muted">Reticule inspired from halo's needler.</span>
+</p>
+
+<p class="aligncenter">
+	<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/boltshot.frag" width="200" height="200"></canvas>
+	<span class="caption text-muted">Halo 5's boltshot reticule.</span>
+</p>
+
+<p class="aligncenter">
+	<canvas class="glslCanvas" data-fragment-url="{{site.baseurl}}/assets/shaders/regular_fucking_crosshair.frag" width="200" height="200"></canvas>
+	<span class="caption text-muted">A very fucking unoriginal crosshair.</span>
+</p>
+
+
 
 <!-- <p>Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center because every point, or none, is center — an equal earth which all men occupy as equals. The airman's earth, if free men make it, will be truly round: a globe in practice, not in theory.</p>
 <h2 class="section-heading">The Final Frontier</h2>
