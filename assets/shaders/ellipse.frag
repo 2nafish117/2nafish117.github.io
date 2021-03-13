@@ -1,6 +1,3 @@
-// Author:
-// Title:
-
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -9,8 +6,6 @@ uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 uniform float u_time;
 
-#define PI 3.14159265359
-#define TWO_PI 6.28318530718
 #define SMOOTH_AMOUNT 0.005
 
 float mask_ellipse(vec2 st, vec2 center, float r1, float r2) {
