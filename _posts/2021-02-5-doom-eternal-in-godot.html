@@ -1,0 +1,179 @@
+---
+layout: post
+title: " The Movement of Doom Eternal"
+subtitle: "remade in the godot game engine"
+date: 2021-05-21 12:00:00 +0530
+background: '/img/godot-code-bg.jpg'
+---
+
+<!-- see below link for code formatting shit -->
+<!-- https://therealweblog.blogspot.com/2019/05/how-to-format-code-snippets-in-blogger.html -->
+<!-- https://github.com/highlightjs/highlight.js/blob/master/SUPPORTED_LANGUAGES.md -->
+<!-- this is all code formatting shit -->
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/atom-one-dark-reasonable.min.css' rel='stylesheet'/>
+<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js'></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- see this for charecter encodings in html -->
+<!-- https://www.freeformatter.com/html-entities.html -->
+
+<p>TLDR: gimme <a href="TODO">playable demo</a> and the <a href="">source code</a>.</p>
+
+<h2 class="section-heading">Movement?</h2>
+
+<p>
+	Movement in Doom Eternal is fast, really fast. You are a race car with legs and guns, ripping and tearing your way through hell.
+	A quote from the director of Doom Eternal, Hugo Martin: 
+	<blockquote class="blockquote">"Doom is a race car and when I walk up to it it should look beautiful, 
+	and when I turn it on it should sound awesome and now I’m excited to take on the challenge in front of me on the race track. 
+	But if it doesn't look that good or feel good I might not be that motivated to take it out for a test drive"</blockquote>
+
+	Clearly they've put in as much thought into the movement of Doom as they have the shooting, enemies and the level design.
+	So what goes into making the movement of Doom Eternal?
+</p>
+
+<p>
+	The race car has to be fast, but how fast? From 
+	<a href="https://www.reddit.com/r/Doom/comments/crxi8d/i_have_calculated_the_slayers_speed_in_doom_2016/">this reddit post</a> 
+	it turns out the original doomguy ran at a max speed of <code>93 km/h</code> (WTF) 
+	and the slayer from Doom 2016 ran at <code>39 km/h</code> (still damn fast) which is <code>10.8 m/s</code>.
+	Movement also has to feel snappy, a high acceleration and ground friction makes the slayer start and stop moving really quick.   
+	These three parameters make up the basics of movement on the ground, <code>speed_ground_max</code>, <code>accel_ground_max</code> and <code>friction_ground</code>.
+</p>
+
+<h2 class="section-heading">Ground Movement</h2>
+
+<p>
+	A common mistake when implementing ground movement is clamping or clipping the velocity of the player to the max speed directly. 
+	This makes it so that the player cannot exceed the max speed defined, you may ask isn't that exactly what we need? Well yes but actually no. 
+	Advanced movement techniques like bunny hopping and using the meathook to traverse around the map wont work if the velocity is clipped.
+</p>
+
+<pre><code class="cpp">&#47;&#47; A big NO NO
+velocity = velocity + delta * accel_ground_max * move_dir
+if (velocity.length() > speed_ground_max) {
+	velocity = speed_ground_max * velocity.normalized()
+}
+</code></pre>
+<span class="caption text-muted">clipping velocity to max_speed.</span>
+
+<p>
+	Instead of clipping the velocity directly, we should think of applying forces or implulses to the player, and when the player reaches the max speed we stop applying the force, and the player stops going any faster.
+	This way we dont limit the players speed if the player bunnyhops or uses other ways to move around. We can model the player movement by adding or subtracting each frame from the current velocity.
+</p>
+
+<pre><code class="cpp">&#47;&#47; YES
+&#47;&#47; friction, reduces velocity by a factor that is proportional to current speed
+float speed = velocity.length()
+if (speed > 0.0) {
+	float drop = friction_ground * delta
+	velocity = velocity * max(speed - drop, 0.0) / speed
+}
+
+&#47;&#47; acceleration, adds to velocity until projection is 0.0
+&#47;&#47; think about how this projection varies as you move and look around, it is the key to bunnyhopping
+float projection = speed_max - velocity.dot(move_dir);
+float add_speed = clamp(projection, 0.0, accel_max * delta);
+velocity = velocity + add_speed * move_dir;
+</code></pre>
+<span class="caption text-muted">simple Quake style movement with friction.</span>
+
+<p>
+	The above pseudo code is translated directly from the Quake movement code. To understand it a bit more watch this <a href="https://youtu.be/rTsXO6Zicls">amazing video</a>.
+	Another thing to keep in mind is the acceleration would also have to be sufficient enough to overcome friction to attain the <code>speed_ground_max</code>.
+</p>
+<p>
+	My implementation does something similar but applies acceleration in a different way and increases friction at low speeds to make it feel like Doom with the air control rune enabled,
+	take a look at the source <a href="TODO">here</a>.
+</p>
+
+<h2 class="section-heading">Air Movement</h2>
+
+<p>
+	Movement in the air is pretty much the same as movement on ground except you would use a different set of variables. <code>speed_air_max</code>, <code>accel_air_max</code> and <code>friction_air</code>.
+	Keeping the <code>speed_air_max</code> the same as <code>speed_ground_max</code> works well, but <code>friction_air</code> could be set to a really small value or just <code>0.0</code> to have no air friction at all,
+	<code>accel_air_max</code> can be kept lower than <code>accel_ground_max</code> owing to the lesser air friction, but greater than <code>0.0</code>, this setup gives the player air mobility.
+</p>
+
+<h2 class="section-heading">Jumping, double jumping and gravity</h2>
+
+<p>
+	Jumping is also pretty simple, just set the <code>UP</code> component of velocity to the <code>speed_jump</code> when the player is on the ground.
+</p>
+
+<pre><code class="cpp">if (input_jump) {
+	velocity.y = speed_jump
+}
+</code></pre>
+<span class="caption text-muted">jumping when on the ground.</span>
+
+<p>
+	Air jumping requires another variable <code>air_jump_count</code> which increments when you jump in the air, and resets back to <code>0</code> when the player touches the ground once again.
+	You cannot air jump anymore when <code>air_jump_count</code> is equal to <code>max_air_jump_count</code>. Another thing that makes jumping off the edge more forgiving is <a href="https://youtu.be/yorTG9at90g?t=576">coyote jumping</a>.
+	Coyote jumping can be achieved by letting the player jump as if he's still on the ground during a buffer period after the player left the ground.
+</p>
+
+<pre><code class="cpp">&#47;&#47; do not air jump also if upward velocity exceeds speed_jump
+if (input_jump and velocity.y < speed_jump) {
+	&#47;&#47; coyote jumping doesnt increment air_jump_count
+	if (time - time_since_on_floor <= coyote_jump_time)
+		velocity.y = speed_jump
+	&#47;&#47; normal air jump
+	elif (air_jump_count < max_air_jump_count) {
+		air_jump_count += 1
+		velocity.y = speed_jump
+	}
+}
+</code></pre>
+<span class="caption text-muted">jumping when in the air, with coyote jumping.</span>
+
+<p>
+	Gravity is applied each frame, along the <code>DOWN</code> direction. You could optionally not add gravity when the player is already on the ground.
+</p>
+
+<pre><code class="cpp">velocity = velocity + gravity * delta * DOWN</code></pre>
+<span class="caption text-muted">applying gravity each frame.</span>
+
+<h2 class="section-heading">Dashing</h2>
+
+<p>
+	Press Shift to sprint? Nah man get that sprint shit outta here. Doom Eternal has a dash mechanic, that lets you ... well ... dash.
+	You dash in the direction of <code>move_dir</code>. When you start a dash all your existing velocity is replaced with a fixed <code>speed_dash_max</code>, that lasts until the entire dash duration. 
+	After the dash is completed the velocity is reduced back to <code>speed_ground_max</code>. During a dash the gravity and ground friction is switched off.
+	Dashes start replenishing as soon as you dash, but activates only when you touch the ground again.
+	Dashes work on the ground as well as in the air, dashing in the ground keeps you on the ground even if you dash off the top of an incline.
+</p>
+
+<h2 class="section-heading">Stepping, Clambering/Vaulting over obstacles</h2>
+<p>
+	When youre in a race car, even the slightest bump in the road can cause you to crash. In Doom Eternal the player can step over small obstacles without losing speed.
+	If the obstacle is waist height or more the player initiates a clamber/vaulting animation. This unlocks a lot of verticality in the gameplay. To implement this there are two parts to it.
+	Stepping and valuting then stepping. 
+</p>
+
+<p>
+	Stepping uses a raycast that starts at knee height to little over ground height, pointing down, but always stays in front of the players position so it can look for steps ahead. 
+	Once it detects a step, the player tests to see if it can move without hitting obstacles along the way to the raycast intersection, and the normal of the intersection point has a significant up component (has to be a floor). 
+	If the test passes the player is teleported to the intersection point.
+</p>
+
+<p>TODO image showing the step raycast and test move of raycast.</p>
+
+<p>
+	Vaulting, like stepping also uses a raycast that starts a little above head height and goes down to the knees. But unlike the stepping raycast it always moves with the direction the camera faces, 
+	so the player can vault along the direction he is looking, not the direction he is moving. Again the vaulting is initiated if the test move up to the vaulting location passes and the normal has a significant up component. 
+	Instead of the player teleporting this time, the player is moved straight up until the stepping raycast kicks in, and then initiates a step. So the vaulting ends with a step.
+</p>
+
+<p>TODO image showing the vaulting raycast and test move of raycast.</p>
+
+<p>The code for both of these can be found <a href="TODO">here</a>.</p>
+
+<h2 class="section-heading">Other ways Doom lets you move</h2>
+<p>
+	Some other ways that Doom Eternal lets you move around are using jump-pads that give you a sudden impulse in a certain direction, using the Meathook on enemies to fling yourself around or get closer to them and 
+	ballista boosting to give you extra momentum in the opposite direction of shooting it.
+</p>
+<p>These are left as an excersice to the read ... nah jk. Just do it yourself. Im tired of writing this blog. Bye.</p>
+<p>Don't forget to check out the <a href="TODO">playable demo</a> and the <a href="">source code</a>.</p>
