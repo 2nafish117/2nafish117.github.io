@@ -158,15 +158,29 @@ if (input_jump and velocity.y < speed_jump) {
 	If the test passes the player is teleported to the intersection point.
 </p>
 
-<p>TODO image showing the step raycast and test move of raycast.</p>
+<table style="table-layout:fixed;width:100%">
+	<tr>
+		<td>
+			<p class="aligncenter">
+				<img class="img-fluid" src="{{site.baseurl}}/img/posts/2021-02-5-doom-eternal-in-godot/step.jpg" alt="Step" width="300">
+				<span class="caption text-muted">(a)</span>
+			</p>
+		</td>
+		<td>
+			<p class="aligncenter">
+				<img class="img-fluid" src="{{site.baseurl}}/img/posts/2021-02-5-doom-eternal-in-godot/vault.jpg" alt="Vault" width="300">
+				<span class="caption text-muted">(b)</span>
+			</p>
+		</td>
+	</tr>
+</table>
+<span class="caption text-muted">(a) todo. (b) todo.</span>
 
 <p>
 	Vaulting, like stepping also uses a raycast that starts a little above head height and goes down to the knees. But unlike the stepping raycast it always moves with the direction the camera faces, 
 	so the player can vault along the direction he is looking, not the direction he is moving. Again the vaulting is initiated if the test move up to the vaulting location passes and the normal has a significant up component. 
 	Instead of the player teleporting this time, the player is moved straight up until the stepping raycast kicks in, and then initiates a step. So the vaulting ends with a step.
 </p>
-
-<p>TODO image showing the vaulting raycast and test move of raycast.</p>
 
 <p>The code for both of these can be found <a href="TODO">here</a>.</p>
 
