@@ -1,0 +1,92 @@
+---
+layout: post
+title: "Bunnyhopping For Noobs"
+subtitle: "its a feature!!"
+date: 2021-07-09 12:00:00 +0530
+background: '/img/godot-code-bg.jpg'
+---
+
+<!-- see below link for code formatting shit -->
+<!-- https://therealweblog.blogspot.com/2019/05/how-to-format-code-snippets-in-blogger.html -->
+<!-- https://github.com/highlightjs/highlight.js/blob/master/SUPPORTED_LANGUAGES.md -->
+<!-- this is all code formatting shit -->
+<link href='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/atom-one-dark-reasonable.min.css' rel='stylesheet'/>
+<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js'></script>
+<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js'></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<!-- see this for charecter encodings in html -->
+<!-- https://www.freeformatter.com/html-entities.html -->
+
+<p>
+	Bunnyhopping or strafe jumping is a general technique in (some) games that let you move faster than the base movement speed. 
+	Originally found in quake, because of an unintended bug (it's a feature damn it) in the game's movement code. 
+	Many other games like half life, counter strike, quake 2 and 3 and more recent games like valorant, apex legends, Doom 2016 and Eternal, titanfall still have it in one form or another. 
+	Some developers choose to embrace it while others try to get rid of it, either way it is a very interesting technique and is worth understanding how it works. 
+</p>
+
+<p>
+	From my expirience playing those games and browsing the internet this is what i've learnt. Here is also a small demo that implements the quake style bunnyhopping. Try beating my top speed of 32.9 m/s.
+</p>
+
+
+<h2 class="section-heading">The Bu ... I mean Feature</h2>
+
+<p>
+	The piece of code responsible for this is the accelerate function that takes in arguments:<br>
+	<code>_velocity</code> (the current velocity)<br>
+	<code>move_direction</code> (intended direction of movement, also called wishdir in the original Quake source)<br>
+	<code>speed_max</code> (the supposedly maximum speed achieveable)<br>
+	<code>accel_max</code> (the maximum acceleration)<br>
+	<code>delta</code> (the time delta between previous frame and current frame)<br>
+	
+</p>
+
+<pre><code class="">func accelerate(_velocity: Vector3, move_direction: Vector3, speed_max: float, accel_max: float, delta: float) -> Vector3:
+	var projection = _velocity.dot(move_direction)
+	var add_speed := clamp(speed_max - projection, 0.0, accel_max * delta)
+	_velocity += add_speed * move_direction
+	return _velocity
+</code></pre>
+
+<p>
+	This part might be a hard to understand for those who dont know what <a href="https://en.wikipedia.org/wiki/Vector_(mathematics_and_physics)">vectors</a> 
+	and <a href="https://en.wikipedia.org/wiki/Dot_product">vector dot product</a> mean. 
+	I suggest reading on those before attempting to continue.
+</p>
+
+<p>
+	Let us try and understand this function. 
+	When you start moving forward from rest, the <code>move_direction</code> is along the same direction as <code>_velocity</code>, 
+	and the <code>_velocity.dot(move_direction)</code> is going to be the same as the magnitude of <code>_velocity</code>. 
+	When the magnitude of <code>_velocity</code> reaches <code>speed_max</code>, <code>clamp(speed_max - projection, 0.0, accel_max * delta)</code> returns <code>0.0</code>.
+</p>
+
+<p>
+	<code>clamp(num, min max)</code> basically returns <code>num</code> if it is in the range <code>min</code> to <code>max</code>,
+	returns <code>min</code> or <code>max</code> depending on it is smaller or larger than the range respectively.
+</p>
+
+<p>
+	So what happens when <code>move_direction</code> is not along <code>_velocity</code>? <br> 
+	This happens when you change the direction in which you move, and then the <code>_velocity</code> follows it.
+	<code>_velocity.dot(move_direction)</code> could return a value less than <code>max_speed</code> even though the magintude of <code>_velocity</code> is equal to <code>max_speed</code>.
+</p>
+
+<p>
+	For example if <code>max_speed</code> is <code>8.0</code>, magnitude of <code>_velocity</code> is <code>8.0</code>, and the angle between <code>move_direction</code> and <code>_velocity</code> is 30 deg.
+	the value of <code>_velocity.dot(move_direction)</code> is going to be <code>8.0 * cos(30 deg)</code>, which is <code>6.92</code>.
+	This means that it is possible to add speed to <code>_velocity</code> beyond <code>max_speed</code>!!
+</p>
+
+<p>
+	To consistently keep the velocity lagging behind the move direction, you need to constantly change the direction in which you move by moving your mouse left or right, along with the direction key you hold down. 
+	To keep this momentum to go from A to B you need to switch the direction you move your mouse along with your direction keys.
+</p>
+
+<p>
+	Here's a <a href="https://youtu.be/h5aB48o39ZI">video</a> showing how, and the <a href="https://2nafish117.itch.io/bhop">demo</a>.
+	Now try breaking the max speed barrier.
+</p>
+
+<span class="caption text-muted">References: TODO</span>
