@@ -320,7 +320,7 @@ h1,h2,h3,h4,h5,h6{
 	cursor:text 
 }
 h1{
-	font-size:58px;
+	font-size:54px;
 	color:var(--color_h1);
 	text-align:center 
 }
@@ -486,7 +486,7 @@ img{
 code,tt{
 	margin:0 2px;
 	padding:0 8px;
-	white-space:nowrap;
+	/* white-space:nowrap; */
    /* border:1px solid #eaeaea;
 	*/
    /* background-color:#f8f8f8;
