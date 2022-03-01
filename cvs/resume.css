@@ -289,8 +289,8 @@ p{
 a{
 	color:var(--color_a);
 	background-color:var(--color_a_background);
-	padding-left: 3px;
-	padding-right: 7px;
+	padding-left: 1px;
+	padding-right: 1px;
 	border-radius: 7px;
 	text-decoration:underline;
 }
@@ -329,6 +329,7 @@ h2{
 	border-bottom:1px solid rgb(148, 148, 148);
 	color:var(--color_h2); 
 	margin-left: 5%;
+	margin-right: 5%;
 }
 h3{
 	font-size:18px;
@@ -360,7 +361,7 @@ strong{
 	border-radius:5px;
 }
 p,blockquote,table,pre{
-	margin:10px 2px 
+	margin:10px 0px 
 }
 ul{
 	padding-left:30px 
@@ -556,13 +557,13 @@ sub{
 	top:-1px 
 }
 @media print{
-	img,pre,blockquote,table,figure{
+	/* img,pre,blockquote,table,figure{
 		page-break-inside:avoid 
-	}
+	} */
 	img{
 		scale: 1;
 		max-width:100px;
-		margin-top: 30px;
+		margin-top: 20px;
 		margin-bottom: 20px;
 		margin-left: 50px;
 		margin-right: 50px;
@@ -574,25 +575,27 @@ sub{
 		margin: 0;
 		padding: 0;
 		font-size: 14px;
-   }
+	}
 	h1,h2,h3,h4,h5,h6{
 		margin:0px 0 0px;
 		padding:0;
 		font-weight:bold;
 		-webkit-font-smoothing:subpixel-antialiased;
 		cursor:text 
-   }
+	}
 	h1{
-		font-size:52px;
+		font-size:42px;
 		color:rgb(58, 58, 58);
 		text-align:center 
    }
 	h2{
-		font-size:30px;
+		font-size:24px;
 		border-bottom:1px solid #ccc;
 		color:var(--color_h2);
 		margin-left: 7%;
-		margin-top: 20px;
+		margin-left: 5%;
+		margin-right: 5%;
+		/* margin-top: 20px; */
    }
 	h3{
 		font-size:16px;
@@ -624,20 +627,7 @@ sub{
 		color:var(--color_code);
 		background-color:var(--color_code_background);
 		font-size: 15px;
-	   /* color:#333!important;
-		*/
-	   /* padding:0 .2em;
-		*/
-	   /* border:1px solid #dedede */
    }
-   /* pre{
-		background:#fff 
-   }
-	pre code{
-		background-color:white!important;
-		overflow:visible 
-   }
-	*/
 }
 @media screen{
 	body.inverted{
@@ -864,4 +854,21 @@ sub{
 .aligncenter {
     text-align: center;
 }
-
+ol{
+	margin: 0px;
+	padding:5px 40px;
+	border-left: 2px solid var(--color_table);
+}
+ul{
+	margin: 0px;
+	list-style-type: none;
+	padding:5px 40px;
+	border-left: 2px solid var(--color_table);
+}
+li{
+	list-style-position: inside;
+	text-indent: -10px;
+	padding-left: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
