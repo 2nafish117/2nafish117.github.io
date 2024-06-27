@@ -8,20 +8,26 @@
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
   <link rel="stylesheet" href="resume.css" />
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
 </head>
 <body>
 <h1 id="shashank-c">Shashank C</h1>
-<h1 id="work-in-progress">🚧🚧🚧 Work in progress 🚧🚧🚧</h1>
+<h4 id="software-engineer-gamer-game-developer.">Software Engineer •
+Gamer • Game Developer.</h4>
 <h5
 id="nafish117.github.io-shashank.shashank.cgmail.com-github.com2nafish117-linkedin-2nafish117.github.iocvsresume_mega"><a href="http://2nafish117.github.io" target="_blank">[
 2nafish117.github.io ]</a> • <a
@@ -48,11 +54,12 @@ depth composition of the real set with the virtual set with the Intel
 Realsense depth camera for Virtual Production in UE5.</br> Personally
 designed &amp; developed a tool to automate color correction for Virtual
 Production in UE5.</br> Designed &amp; implemented an analytics system
-for ongoing Unity VR medical simulation projects, application generates
-events that are stored into a local embedded database that can be
-queried to generate session analytics.</br> Added functional tests to a
-scenario based VR medical simulation project in UE4 that reduced testing
-time required by the QA team.</li>
+for Unity VR medical simulation projects, application events are stored
+into a local embedded database that can be queried to generate session
+analytics.</br> Scripted Tutorial scenarios for VR medical simulation
+project in UE4.</br> Added functional tests to a scenario based VR
+medical simulation project in UE4 that reduced testing time required by
+the QA team.</li>
 <li><code>SEP 2020 - SEP 2022</code> <strong>Engineer, Sling Media Pvt
 Ltd, Bangalore, India</strong> Worked on the backend metadata services
 for SlingTV. Contributed in launching 8 third party channels, feature
@@ -89,7 +96,7 @@ objects. In addition to this it connects via udp sockets to consume
 mobile phone orientation data to move the camera. <a
 href="https://github.com/2nafish117/CGProj">GitHub</a></li>
 <li><code>Grapple System</code> Like the one found in Titanfall 2, uses
-the rope plugin mentioned above. view <a
+the rope plugin i developed. view <a
 href="https://youtu.be/YCmaHjnPSHI">here</a>. It has since been improved
 to pull rigidbodies towards the player and attach onto moving
 platforms.</li>

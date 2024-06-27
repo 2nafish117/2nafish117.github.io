@@ -8,16 +8,21 @@
   <style>
     code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
   <link rel="stylesheet" href="resume.css" />
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
 </head>
 <body>
 <h1 id="shashank-c">Shashank C</h1>
@@ -109,13 +114,6 @@ where you can record yourself and use your recorded clone to solve
 puzzles. Developed for the <strong>Brackeys Gamejam 2020.2</strong>,
 playable <a
 href="https://2nafish117.itch.io/record-yourself">here</a>.</li>
-<li><code>The Weekend (theme: relax)</code> A game where you play a guy
-who just got off work and plans to relax on the weekend. Developed for
-the <strong>Untitled Gamejam #41</strong>, playable <a
-href="https://2nafish117.itch.io/the-weekend">here</a>.</li>
-<li><code>Yeet n Skeet</code> Platformer where you reach the goal while
-collecting coins, walljumping and avoiding a rising flood. playable <a
-href="https://2nafish117.itch.io/yeet-n-skeet">here</a>.</li>
 <li><code>Viewmodel Animations</code> AK-47 and G3 first person
 animations in Blender. view <a
 href="https://youtu.be/4GcZYHSwj1I">here</a> and <a
@@ -132,6 +130,8 @@ cycle.</li>
 <li><code>Programmed a maze solver</code> that reads the maze from a
 bitmap or plaintext file and uses Djikstra’s algorithm to solve it, then
 writes the path into another bitmap or plaintext file.</li>
+<li><code>See more of my projects</code> <a
+href="http://2nafish117.github.io/cvs/projects.html">projects</a></li>
 </ul>
 <h2 id="skills">Skills</h2>
 <ul>
