@@ -50,7 +50,7 @@ const char* const DaysToString[] = {
 <p>So whats the problem with this?</p>
 <p>
 	Well for starters if you need to add another day, then you need to make changes in the code in two places. 
-	Might not look too difficult when you have so few enums, but think about maintaining them when you have more than a handful. Or being the forgetful shit you are, you may just forget.
+	Might not look too difficult when you have so few enums, but think about maintaining them when you have more than a handful. Or being the forgetful bum you are, you may just forget.
 	Also, if you re-arrange the days, you need to re-arrange them in the strings as well. Change the enum spelling? Guess what, you need to change it in the strings.	
 </p>
 
@@ -63,7 +63,7 @@ const char* const DaysToString[] = {
 
 <p>First you make a file containing this ...</p>
 
-<pre><code class="cpp">&#47;&#47; DaysEnums.incl, call it whatever tf you want.
+<pre><code class="cpp">&#47;&#47; DaysEnums.incl, call it whatever you want.
 REGISTER_ENUM(MONDAY = 0) &#47;&#47; You can do the "= 0" as well
 REGISTER_ENUM(TUESDAY)
 REGISTER_ENUM(WEDNESDAY)
@@ -73,10 +73,10 @@ REGISTER_ENUM(SATURDAY)
 REGISTER_ENUM(SUNDAY)
 </code></pre>
 
-<p> Dont lose your shit yet, next code snippet actually defines <code>REGISTER_ENUM</code>. Notice it contains no commas, semicolons. </p>
+<p> Dont lose your marbles yet, next code snippet actually defines <code>REGISTER_ENUM</code>. Notice it contains no commas, semicolons. </p>
 <p>And in a second file, this .. </p>
 
-<pre><code class="cpp">&#47;&#47; DaysEnumsDef.h, call it whatever tf you want.
+<pre><code class="cpp">&#47;&#47; DaysEnumsDef.h, call it whatever you want.
 #define REGISTER_ENUM(x) x, &#47;&#47; It expands to literally x followed by a comma
 
 enum Days{
@@ -101,8 +101,8 @@ const char* const DaysToString[] = {
 </p>
 
 <p>
-	Now its your choice if you want to use this or not. Is it really simpler than just doing it yourself? You be the judge of that. Preprocessor magic shit 
-	like this is what makes newcomers to your codebase bleed their eyes out, so maybe comment this shit out?
+	Now its your choice if you want to use this or not. Is it really simpler than just doing it yourself? You be the judge of that. Preprocessor magic stuff 
+	like this is what makes newcomers to your codebase bleed their eyes out, so maybe comment this out?
 	And with that ill see y'all in the next post.
 </p>
 
